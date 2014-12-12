@@ -58,7 +58,7 @@ $plugin_folder = get_plugins( '/' . plugin_basename( dirname( __FILE__ ) ) );
 $plugin_file = basename( ( __FILE__ ) );
 $plugin_version = $plugin_folder[$plugin_file]['Version'];    
 $sslp_ver_option = get_option('_simple_staff_list_version');
-if ($sslp_ver_option == "" || $sslp_ver_option <= $plugin_version){
+if ($sslp_ver_option === '' || $sslp_ver_option < $plugin_version) {
 	sslp_staff_member_plugin_update($sslp_ver_option, $plugin_version);
 }
 
