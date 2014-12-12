@@ -17,11 +17,19 @@
 function sslp_staff_member_info_meta_box(){
 	global $post;
 	$custom = get_post_custom($post->ID);
-	$_staff_member_title = $custom["_staff_member_title"][0];
-	$_staff_member_email = $custom["_staff_member_email"][0];
-	$_staff_member_phone = $custom["_staff_member_phone"][0];
-	$_staff_member_fb	 = $custom["_staff_member_fb"][0];
-	$_staff_member_tw	 = $custom["_staff_member_tw"][0];
+  if ($custom) {
+  	$_staff_member_title = $custom["_staff_member_title"][0];
+  	$_staff_member_email = $custom["_staff_member_email"][0];
+  	$_staff_member_phone = $custom["_staff_member_phone"][0];
+  	$_staff_member_fb	 = $custom["_staff_member_fb"][0];
+  	$_staff_member_tw	 = $custom["_staff_member_tw"][0];
+  } else {
+  	$_staff_member_title = '';
+  	$_staff_member_email = '';
+  	$_staff_member_phone = '';
+  	$_staff_member_fb	 = '';
+  	$_staff_member_tw	 = '';
+  }
 	?>
 
 	<div class="sslp_admin_wrap">
@@ -55,13 +63,17 @@ function sslp_staff_member_warning_meta_box() {
 function sslp_staff_member_bio_meta_box(){
 	global $post;
 	$custom = get_post_custom($post->ID);
-	$_staff_member_bio = $custom["_staff_member_bio"][0];
+  if ($custom) {
+    $_staff_member_bio = $custom["_staff_member_bio"][0];
+  } else {
+    $_staff_member_bio = '';
+  }
 	
 	wp_editor( $_staff_member_bio, '_staff_member_bio', $settings = array(
-												textarea_rows => 8,
-												media_buttons => false,
-												tinymce => true, // Disables actual TinyMCE buttons // This makes the rich content editor
-												quicktags => true // Use QuickTags for formatting    // work within a metabox.
+												'textarea_rows' => 8,
+												'media_buttons' => false,
+												'tinymce' => true, // Disables actual TinyMCE buttons // This makes the rich content editor
+												'quicktags' => true // Use QuickTags for formatting    // work within a metabox.
 												) );
 	?>
 	
@@ -78,17 +90,33 @@ function sslp_staff_member_bio_meta_box(){
 /*
 // Staff List Custom Column View
 //////////////////////////////*/
+function sc_get_custom_field($custom, $name, $default=null) {
+  if ($custom) {
+    if (isset($custom[$name])) {
+      return $custom[$name][0];
+    }
+  }
+  return $default;
+}
+
+function sc_text_field($custom, $fieldName, $label, $placeholder) {
+
+  $currentValue = get_custom_field($custom, $fieldName);
+  if (!empty($currentValue)) {
+     $placeholder = '';
+  }
+  $className = preg_replace('/kb_/', '', $fieldName);
+  $className = preg_replace('/_/', '-', $className);
+  return sprintf('<div class="%s"><label for="%s">%s: <input type="text" name="%s" id="%s" placeholder="%s" value="%s" /></label></div>',
+  $className, $fieldName, $label, $fieldName, $fieldName, $placeholder, $currentValue);
+}
 
 add_action( "manage_posts_custom_column", "sslp_staff_member_display_custom_columns");
 
 function sslp_staff_member_display_custom_columns( $column ) {
   global $post;
   $custom = get_post_custom();
-  
-  $_staff_member_title = $custom["_staff_member_title"][0];
-  $_staff_member_email = $custom["_staff_member_email"][0];
-  $_staff_member_phone = $custom["_staff_member_phone"][0];
-  $_staff_member_bio   = $custom["_staff_member_bio"][0];
+ 
   switch ( $column ) {
     case "photo":
       if(has_post_thumbnail()){
@@ -96,16 +124,16 @@ function sslp_staff_member_display_custom_columns( $column ) {
       }
       break;
   	case "_staff_member_title":
-  	  echo $_staff_member_title;
+  	  echo sc_get_custom_field($custom, '_staff_member_title');
   	  break;
     case "_staff_member_email":
-      echo '<a href="mailto:' . $_staff_member_email . '">' . $_staff_member_email . '</a>';
+      echo '<a href="mailto:' . sc_get_custom_field($custom, '_staff_member_email') . '">' . sc_get_custom_field($custom, '_staff_member_email') . '</a>';
       break;
     case "_staff_member_phone":
-      echo $_staff_member_phone;
+      echo sc_get_custom_field($custom, '_staff_member_phone');
       break;
     case "_staff_member_bio":
-      echo staff_bio_excerpt($_staff_member_bio, 10);
+      echo staff_bio_excerpt(sc_get_custom_field($custom, '_staff_member_bio'), 10);
       break;
   }
 }
@@ -256,7 +284,7 @@ function sslp_staff_member_template_page(){
 		$custom_html = stripslashes_deep(get_option('_staff_listing_custom_html'));
 		$custom_css = stripslashes_deep(get_option('_staff_listing_custom_css'));
 		
-		if ( $_POST[ "write-external-css" ] != "yes" ) {
+		if ( $_POST[ "write-external-css" ] !== "yes" ) {
 			update_option('_staff_listing_write_external_css', "no");
 			$write_external_css = "no";
 		} else {
@@ -272,7 +300,7 @@ function sslp_staff_member_template_page(){
 	} else {
 		$custom_html = stripslashes_deep(get_option('_staff_listing_custom_html'));
 		
-		if ( $write_external_css == "yes" ) {
+		if ( $write_external_css === 'yes' ) {
 		
 			$filename = get_stylesheet_directory() . '/simple-staff-list-custom.css';
 				
@@ -289,11 +317,13 @@ function sslp_staff_member_template_page(){
 		}
 	}
 	
-	if ( $write_external_css == 'yes' ){
-		$ext_css_check = "checked";
+	if ($write_external_css == 'yes') {
+		$ext_css_check = 'checked';
+	} else {
+	  $ext_css_check = '';
 	}
 	
-	$output .= '<div class="wrap sslp-template">';
+	$output = '<div class="wrap sslp-template">';
 	$output .= '<div id="icon-edit" class="icon32 icon32-posts-staff-member"><br></div><h2>' . __( 'Simple Staff List' ) . '</h2>';
 	$output .= '<h2>Templates</h2>';
     
