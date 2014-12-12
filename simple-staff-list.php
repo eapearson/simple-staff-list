@@ -156,7 +156,7 @@ function sslp_staff_member_init() {
         'hierarchical' => false,
         'menu_position' => 100,
         'rewrite' => array('slug'=>'staff-members','with_front'=>false),
-        'supports' => array( 'title', 'thumbnail', 'excerpt' )
+        'supports' => array( 'editor', 'title', 'thumbnail', 'excerpt' )
     );
 
     register_post_type( 'staff-member', $args );
@@ -301,6 +301,7 @@ function sslp_staff_member_custom_columns( $cols ) {
 	$cols = array(
 		'cb'                  =>     '<input type="checkbox" />',
 		'title'               => __( 'Name', 'simple-staff-list' ),
+		'editor'              => __('Bio', 'simple-staff-list'),
 		'photo'               => __( 'Photo', 'simple-staff-list' ),
 		'_staff_member_title' => __( 'Position', 'simple-staff-list' ),
 		'_staff_member_email' => __( 'Email', 'simple-staff-list' ),
