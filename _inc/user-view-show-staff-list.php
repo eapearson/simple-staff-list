@@ -42,7 +42,9 @@ function sslp_staff_member_listing_shortcode_func($atts) {
 	/**
 	  * Set up our loop_markup
 	  */
-	
+	# eap - but keep any wrapper text too.
+    $wrap_begin = substr($custom_html, 0, strpos($custom_html, "[staff_loop]"));
+    $wrap_end = substr($custom_html, strpos($custom_html, "[/staff_loop]")+strlen("[/staff_loop]"));
 	$loop_markup = $loop_markup_reset = str_replace("[staff_loop]", "", substr($custom_html, strpos($custom_html, "[staff_loop]"), strpos($custom_html, "[/staff_loop]") - strpos($custom_html, "[staff_loop]")));
 	
 	
@@ -52,6 +54,8 @@ function sslp_staff_member_listing_shortcode_func($atts) {
 	// Prepare to output styles if not using external style sheet
 	if ( $use_external_css == "no" ) {
 		$style_output = '<style>'.$custom_css.'</style>';
+	} else {
+	  $style_output = '';
 	}
 	
 	$i = 0;
@@ -130,7 +134,7 @@ function sslp_staff_member_listing_shortcode_func($atts) {
 	
 	wp_reset_query();
 	
-	$output = $style_output.$output;
+	$output = $style_output . $wrap_begin . $output . $wrap_end;
 	
 	return do_shortcode($output);
 }
