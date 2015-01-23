@@ -73,6 +73,9 @@ function get_sslp_terms($tax) {
 	function add_to_admin_body_class($classes) {
 		// get the global post variable
 		global $post;
+    if (!$post) {
+      return $classes;
+    }
 		// instantiate, should be overwritten
 		$mode = '';
 		// get the current page's URI (the part /after/ your domain name)
